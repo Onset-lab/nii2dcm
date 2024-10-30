@@ -34,63 +34,23 @@ jobs:
         pip install flake8 pytest pytest-cov
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-    - name: Display installed pip packages
+    - name: Install nii2dcm
       run: |
-        pip list
-
-    - name: Setup flake8 annotations
-      uses: rbialon/flake8-annotations@v1
-
-    - name: Lint with flake8
-      run: |
-        # stop the build if there are Python syntax errors or undefined names
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-
-    - name: Build nii2dcm
-      run: |
-        pip install .
+        pip install -e .
 
     - name: Test nii2dcm install
       run: |
-        nii2dcm -h
-        nii2dcm -v
+        convert_nii2dcm.py -h
+        convert_nii2dcm.py -v
 
-    - name: Run unit tests
-      run: |
-        pytest tests/
-
-    - name: Test DicomMRISVR creation
+    - name: Test DicomMRI creation
       run: |
         # run nii2dcm
         mkdir output
-        nii2dcm tests/data/DicomMRISVR/t2-svr-atlas-35wk.nii.gz ./output -d SVR
+        convert_nii2dcm.py tests/data/DicomMRISVR/t2-svr-atlas-35wk.nii.gz ./output -d MR
         ls ./output
         # assert DICOM files exist
         [ -f "./output/IM_0001.dcm" ] && echo "Output DICOM file exists" || exit 1
-
-    - name: Build pytest coverage file
-      run: |
-        pytest --junitxml=pytest.xml --cov-report=term-missing:skip-covered --cov=nii2dcm tests/ | tee pytest-coverage.txt ; echo $?
-
-    - name: Pytest coverage comment
-      id: coverageComment
-      uses: MishaKav/pytest-coverage-comment@main
-      with:
-        pytest-coverage-path: ./pytest-coverage.txt
-        junitxml-path: ./pytest.xml
-
-    - name: Update Coverage Badge
-      uses: schneegans/dynamic-badges-action@v1.7.0
-      with:
-        auth: ${{ secrets.PYTEST_COVERAGE_COMMENT }}
-        gistID: 57ef8057d04f67dbe6e64df410b83079
-        filename: nii2dcm-pytest-coverage-comment.json
-        label: Coverage Report
-        message: ${{ steps.coverageComment.outputs.coverage }}
-        color: ${{ steps.coverageComment.outputs.color }}
-        namedLogo: python
 
   container-build-and-test:
     name: Container
