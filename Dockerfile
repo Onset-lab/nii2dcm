@@ -12,6 +12,3 @@ RUN pip install dcm2bids
 # Install nii2dcm
 RUN python3 -m pip install --upgrade pip && \
     pip install git+https://github.com/onset-lab/nii2dcm.git@${NII2DCM_REVISION}
-
-ADD rbx.tar.gz /
-WORKDIR /
