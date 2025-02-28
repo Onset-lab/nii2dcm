@@ -119,7 +119,6 @@ def transfer_custom_dicom_tags(
     ref_dcm - reference DICOM object
     """
     if StudyDescription:
-        dcm.init_study_tags()
         dcm.ds.StudyTime = dcm.ds.SeriesTime
         dcm.ds.StudyDate = dcm.ds.SeriesDate
     dcm.ds.StudyDescription = (

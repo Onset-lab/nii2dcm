@@ -64,7 +64,6 @@ def run_nii2dcm(
             nii_img[nii_img < 0] = 0  # set background pixels = 0 (negative in SVRTK)
             nii_img = nii_img.astype("uint16")
 
-        dicom.ds.StudyInstanceUID = study_uid
         # load reference DICOM object
         # --ref_dicom_file specified on command line
         if ref_dicom_file is not None:
@@ -80,6 +79,7 @@ def run_nii2dcm(
             transfer_ref_dicom_series_tags(dicom, ref_dicom)
 
         transfer_custom_dicom_tags(dicom, study_description, desc, protocol_name)
+        dicom.ds.StudyInstanceUID = study_uid
 
         """
         Write DICOM files

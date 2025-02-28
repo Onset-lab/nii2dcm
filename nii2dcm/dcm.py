@@ -237,11 +237,7 @@ class DicomMRI(Dicom):
         #  ReferencedStudySequence,
         #  ConversionSourceAttributesSequence
         #  - conflicts if _included_?
-
         self.attributes_to_transfer = [
-            "StudyDate",
-            "SeriesDate",  # TODO omit so SeriesDate = when DICOM created, not acquired? Consistent with SeriesTime
-            "AcquisitionDate",
             "AccessionNumber",
             "InstitutionName",
             "InstitutionAddress",
