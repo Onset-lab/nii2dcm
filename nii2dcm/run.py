@@ -45,7 +45,7 @@ def run_nii2dcm(
         # get pixel data from NIfTI
         # TODO: create method in nii class
         nii_img = nii.get_fdata()
-        nii_img = nii_img.astype("uint16")  # match DICOM datatype
+        nii_img = nii_img.astype("int16")  # match DICOM datatype
 
         # get NIfTI parameters
         nii2dcm_parameters = nii2dcm.nii.Nifti.get_nii2dcm_parameters(nii)
@@ -63,6 +63,8 @@ def run_nii2dcm(
             nii_img = nii.get_fdata()
             nii_img[nii_img < 0] = 0  # set background pixels = 0 (negative in SVRTK)
             nii_img = nii_img.astype("uint16")
+        if dicom_type is not None and dicom_type.upper() in ["CT", "CTSCAN"]:
+            dicom = nii2dcm.dcm.DicomCT("nii2dcm_dicom_ct.dcm")
 
         # load reference DICOM object
         # --ref_dicom_file specified on command line
@@ -80,6 +82,25 @@ def run_nii2dcm(
 
         transfer_custom_dicom_tags(dicom, study_description, desc, protocol_name)
         dicom.ds.StudyInstanceUID = study_uid
+
+        if dicom_type is not None and dicom_type.upper() in ["CT", "CTSCAN"]:
+            dicom.ds.SamplesPerPixel = 1
+            dicom.ds.PhotometricInterpretation = "MONOCHROME2"
+            dicom.ds.BitsAllocated = 16
+            dicom.ds.BitsStored = 12
+            dicom.ds.HighBit = 11
+            dicom.ds.PixelRepresentation = 0
+            dicom.ds.RescaleIntercept = -1024
+            dicom.ds.SmallestImagePixelValue = 0
+            dicom.ds.LargestImagePixelValue = int(
+                nii_img.max() - dicom.ds.RescaleIntercept
+            )
+            dicom.ds.RescaleType = "HU"
+            dicom.ds.RescaleSlope = 1
+            nii_img[nii_img < -1000] = -1000  # set background pixels = -1000 (CT)
+            nii_img = nii_img + 1024  # convert to HU
+            dicom.ds.WindowCenter = "35"
+            dicom.ds.WindowWidth = "80"
 
         """
         Write DICOM files
