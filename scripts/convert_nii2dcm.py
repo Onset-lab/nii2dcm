@@ -28,6 +28,7 @@ def main(args=None):
         "-d",
         "--dicom_type",
         type=str,
+        choices=["MR", "MRI", "SVR", "CT", "CTSCAN"],
         help="[string] type of DICOM. Available types: MR, SVR.",
     )
     parser.add_argument(
